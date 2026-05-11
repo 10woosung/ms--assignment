@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <form id="signupForm">
+      <h1>회원가입</h1>
+      <div>email: <input id="email" type="email" /></div>
+      <div>password: <input id="password" type="password" /></div>
+      <button type="submit">회원가입 하기</button>
+      <button id="goLogin" type="button">로그인 하러 하기</button>
+    </form>
+  </div>
+
+  <!-- 반드시 이 태그(아래)가 import를 포함하는 '유일한' 스크립트여야 함 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword , onAuthStateChanged ,signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+    
+
+
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLfEgfj4A80tZPXW-OGvGlBojy1LYGuNg",
+      authDomain: "easylogin-1e88a.firebaseapp.com",
+      projectId: "easylogin-1e88a",
+      storageBucket: "easylogin-1e88a.appspot.com",   // 권장 형식
+      messagingSenderId: "462023686921",
+      appId: "1:462023686921:web:c0cd78e1f093251c97b1d8",
+      measurementId: "G-NDCB1NNQ2Y"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    isSupported().then(ok => { if (ok) getAnalytics(app); });
+
+    // Auth 객체 만들기
+    const auth = getAuth(app);
+
+    // DOM 요소
+    const emailInput = document.getElementById('email');
+    const pwInput = document.getElementById('password');
+    const goLoginBtn = document.getElementById('goLogin');
+    const form = document.getElementById('signupForm');
+
+
+    // "로그인 하러 하기" 버튼 (지금은 그냥 alert, 나중에 login.html로 location.href 바꿔도 됨)
+    goLoginBtn.addEventListener('click', () => {
+
+        const email = emailInput.value.trim();
+        const password = pwInput.value;
+        const auth = getAuth(app);
+        if(!email || !password){
+            alert("이메일과 비밀번호를 둘 다 입력하시오");
+            return;
+        }
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+
+            alert("로그인 성공! 🎉");
+            window.location.href = "main.html";
+        })
+        .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+        });
+        
+
+      
+      // 예시: 나중에 로그인 페이지 만들면
+      // location.href = "/login.html";
+    });
+
+    // 회원가입 폼 submit 이벤트 → Firebase Auth로 회원가입
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); // 기본 새로고침 막기
+
+      const email = emailInput.value.trim();
+      const password = pwInput.value;
+
+      if (!email || !password) {
+        alert("이메일과 비밀번호를 둘 다 입력해줘!");
+        return;
+      }
+
+      // 🔥 여기서 진짜 Firebase에 유저 생성
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log("회원가입 성공:", user);
+          alert("회원가입 성공! 🎉\n" + user.email);
+          window.location.href = "main.html";
+
+          // 가입 후에 원하는 곳으로 이동 가능
+          // location.href = "/main.html";
+        })
+        .catch((error) => {
+          console.error("회원가입 에러:", error);
+          alert(`회원가입 실패 😢\n코드: ${error.code}\n메시지: ${error.message}`);
+        });
+    });
+
+    console.log("Firebase 회원가입 페이지 준비 완료");
+  </script>
+</body>
+</html>
